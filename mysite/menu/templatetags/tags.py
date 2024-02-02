@@ -5,32 +5,23 @@ register = template.Library()
 
 
 def get_all_menu(menu_items):
-    menu_items.is_active = True
-    menu_items.save()
     all_menu = [menu_items]
     if menu_items.children.all():
-        for item in menu_items.children.all():
-            item.is_active = True
-            item.save()
+        menu_items.children.all().update(is_active=True)
     while menu_items.parent:
         menu_items = menu_items.parent
-        menu_items.is_active = True
-        menu_items.save()
         all_menu.insert(0, menu_items)
     return all_menu
 
 
 @register.inclusion_tag('menu/menu.html', takes_context=True)
 def draw_menu(context, menu_name):
-    default_state = Menu.objects.all()
-    for state in default_state:
-        state.is_active = False
-        state.save()
+    Menu.objects.all().update(is_active=False)
     menu_item = Menu.objects.filter(name=menu_name).select_related('parent').first()
     current_url = context['request'].path
-    print(current_url)
     if menu_item:
         get_menu = get_all_menu(menu_item)
+        Menu.objects.filter(id__in=[item.id for item in get_menu]).update(is_active=True)
         return {'menu_items': get_menu[0], 'current_url': current_url}
     return {'menu_items': [], 'current_url': current_url}
 
