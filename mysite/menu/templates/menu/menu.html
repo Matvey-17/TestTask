@@ -1,0 +1,22 @@
+{% load tags %}
+<li>
+    <a href="{{ menu_items.url }}" {% if menu_items.url == current_url %} class="active" {% endif %}>{{ menu_items.name }}</a>
+    {% if menu_items.children.all %}
+        <ul>
+            {% for child in menu_items.children.all %}
+                <li>
+                    <a href="{{ child.url }}" {% if child.url == current_url %} class="active" {% endif %}>{{ child.name }}</a>
+                    {% if child.children.all and child.is_active %}
+                        {% draw_menu_recursive child %}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</li>
+
+
+
+
+
+
